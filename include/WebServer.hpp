@@ -5,7 +5,7 @@
 
 class WebServer{
     public:
-        WebServer(const char* ssid, const char* password, String serverName);
+        void initWebServer(const char* ssid, const char* password, String serverName);
         int wifiConnected();
         String makeJson(std::vector<String> keys, std::vector<String> values);
         void sendPostRequest(String header, String data);

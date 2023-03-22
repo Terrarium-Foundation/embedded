@@ -1,25 +1,24 @@
 #include <WebServer.hpp>
 
-WebServer::WebServer(const char* ssid, const char* password, String toServer){
+void WebServer::initWebServer(const char* ssid, const char* password, String toServer){
 
-    WiFiServer server(80);
-    Serial.begin(9600);
-    WebServer::serverName = toServer;
-    // Connect to Wi-Fi network with SSID and password
-    Serial.print("Connecting to ");
-    Serial.println(ssid);
-    WiFi.begin(ssid, password);
-    while (!wifiConnected()) {
-        delay(500);
-        Serial.print(">");
-    }
-    // Print local IP address and start web server
-    Serial.println("");
-    Serial.println("WiFi connected!");
-    Serial.print("IP address: ");
-    Serial.println(WiFi.localIP());
-    
-    server.begin();
+  WiFiServer server(80);
+  WebServer::serverName = toServer;
+  // Connect to Wi-Fi network with SSID and password
+  Serial.print("Connecting to ");
+  Serial.println(ssid);
+  WiFi.begin(ssid, password);
+  while (WiFi.status() != WL_CONNECTED) {
+      delay(500);
+      Serial.print(">");
+  }
+  // Print local IP address and start web server
+  Serial.println("");
+  Serial.println("WiFi connected!");
+  Serial.print("IP address: ");
+  Serial.println(WiFi.localIP());
+  
+  server.begin();
 }
 
 int WebServer::wifiConnected(){
@@ -36,7 +35,7 @@ String WebServer::makeJson(std::vector<String> keys, std::vector<String> values)
             jsonData+="\""+keys[i]+"\""+":\""+values[i]+"\",";
         }
         jsonData = jsonData.substring(0, jsonData.length()-1);
-        jsonData+=";}";
+        jsonData+="}";
     }
 
     return jsonData;
