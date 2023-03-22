@@ -1,6 +1,7 @@
 // Load Wi-Fi library
 #include <WiFi.h>
 #include <WebServer.hpp>
+#include <Arduino_JSON.h>
 
 // Replace with your network credentials
 const char* ssid = "Simha";
@@ -21,7 +22,16 @@ void loop(){
   std::vector<String> values = {"n", "a", "v"};
   if(server.wifiConnected()){
     String jsonData = server.makeJson(keys, values);
-    server.sendPostRequest("/esp32",jsonData);
+    String response = server.postRequest("/esp32",jsonData);
+    
+    // JSONVar res = JSON.parse(response);
+    // JSONVar keys = res.keys();
+
+    // for(int i=0; i<keys.length(); i++){
+    //   JSONVar value = res[keys[i]];
+    //   Serial.print(keys[i]+": ");
+    //   Serial.println(value);
+    // }
   }
 
   delay(1000);

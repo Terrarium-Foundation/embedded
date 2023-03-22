@@ -41,8 +41,27 @@ String WebServer::makeJson(std::vector<String> keys, std::vector<String> values)
     return jsonData;
 }
 
-void WebServer::sendPostRequest(String header, String data){
+String WebServer::getRequest(String header, String data){
 
+    String payload;
+
+    if(wifiConnected()){
+        WiFiClient client;
+        HTTPClient http;
+
+        //data not included in GET request as this would mainly be used to fetch instructions
+        String serverPath = WebServer::serverName+header;
+        http.begin(serverPath.c_str());
+
+        payload = http.getString();
+    }
+
+    return payload;
+}
+
+String WebServer::postRequest(String header, String data){
+
+    String payload;
     if(wifiConnected()){
         WiFiClient client;
         HTTPClient http;
@@ -52,6 +71,13 @@ void WebServer::sendPostRequest(String header, String data){
 
         int httpResponseCode = http.POST(data);
         
+        Serial.print("HTTP POST returned with response code: ");
+        Serial.println(httpResponseCode);
+        payload = http.getString();
+        //Serial.println(payload);
+
         http.end();
     }
+
+    return payload;
 }
