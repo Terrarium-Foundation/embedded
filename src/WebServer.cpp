@@ -74,7 +74,7 @@ String WebServer::postRequest(String header, String data){
         Serial.print("HTTP POST returned with response code: ");
         Serial.println(httpResponseCode);
         payload = http.getString();
-        //Serial.println(payload);
+        Serial.println(payload);
 
         http.end();
     }
