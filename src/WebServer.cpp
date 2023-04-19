@@ -2,7 +2,6 @@
 
 void WebServer::initWebServer(const char* ssid, const char* password, String toServer){
 
-  WiFiServer server(80);
   WebServer::serverName = toServer;
   // Connect to Wi-Fi network with SSID and password
   Serial.print("Connecting to ");
@@ -17,8 +16,6 @@ void WebServer::initWebServer(const char* ssid, const char* password, String toS
   Serial.println("WiFi connected!");
   Serial.print("IP address: ");
   Serial.println(WiFi.localIP());
-  
-  server.begin();
 }
 
 int WebServer::wifiConnected(){

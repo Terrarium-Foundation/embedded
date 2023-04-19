@@ -1,31 +1,80 @@
-// Load Wi-Fi library
-#include <WiFi.h>
+#include <AsyncTCP.h>
+#include <ESPAsyncWebServer.h>
+#include <ArduinoJson.h>
 #include <WebServer.hpp>
-#include <Arduino_JSON.h>
-#include <SoilMoisture.hpp>
-#include <Timer.hpp>
 
-// Replace with your network credentials
+// Define your WiFi credentials
 const char* ssid = "Simha";
 const char* password = "Jogi2Jogi";
-//esp32 doesnt work with localhost or 127.0.0.1, get the actual ip address of machine it is hosted on
-String toServer = "http://192.168.1.26:4000";
 
 
-// WebServer server;
-// SoilMoisture soil(2);
-Timer pump;
+WebServer server;
 
-void setup(){
+// Initialize the AsyncWebServer object
+AsyncWebServer router(80);
+
+void setup() {
+
   Serial.begin(9600);
-  // server.initWebServer(ssid, password, toServer);
-  pump.initTimer(1000, 2000);
-  pump.startTimer();
+
+  server.initWebServer(ssid, password, "http://localhost:4000");
+
+  router.on("/a", HTTP_POST, [](AsyncWebServerRequest * request){
+  }, NULL, [](AsyncWebServerRequest * request, uint8_t *data, size_t len, size_t index, size_t total) {
+    // Handle message       
+    DynamicJsonDocument doc(1024);
+    DeserializationError error = deserializeJson(doc, data);
+    if(error){
+      Serial.print(F("deserializeJson() failed: "));
+      Serial.println(error.c_str());
+      request->send(400, "text/plain", "Bad Request");
+      return;
+    }
+
+    const char* message = doc["a"];
+    Serial.println(message);
+
+    request->send(200);
+  });
+  
+  router.on("/b", HTTP_POST, [](AsyncWebServerRequest * request){
+  }, NULL, [](AsyncWebServerRequest * request, uint8_t *data, size_t len, size_t index, size_t total) {
+    // Handle message       
+    DynamicJsonDocument doc(1024);
+    DeserializationError error = deserializeJson(doc, data);
+    if(error){
+      Serial.print(F("deserializeJson() failed: "));
+      Serial.println(error.c_str());
+      request->send(400, "text/plain", "Bad Request");
+      return;
+    }
+
+    const char* message = doc["b"];
+    Serial.println(message);
+
+    request->send(200);
+  });
+
+    router.on("/c", HTTP_POST, [](AsyncWebServerRequest * request){
+  }, NULL, [](AsyncWebServerRequest * request, uint8_t *data, size_t len, size_t index, size_t total) {
+    // Handle message       
+    DynamicJsonDocument doc(1024);
+    DeserializationError error = deserializeJson(doc, data);
+    if(error){
+      Serial.print(F("deserializeJson() failed: "));
+      Serial.println(error.c_str());
+      request->send(400, "text/plain", "Bad Request");
+      return;
+    }
+
+    const char* message = doc["c"];
+    Serial.println(message);
+
+    request->send(200);
+  });
+  // Start the server
+  router.begin();
 }
 
-void loop(){
-  Serial.println("It is ON!");
-  while(pump.isOn()){pump.updateTimer();}
-  Serial.println("It is OFF!");
-  while(!pump.isOn()){pump.updateTimer();}
+void loop() {
 }

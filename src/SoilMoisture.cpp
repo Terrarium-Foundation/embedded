@@ -6,6 +6,6 @@ SoilMoisture::SoilMoisture(int pin){
 
 float SoilMoisture::readData(){
     SoilMoisture::moisture = analogRead(SoilMoisture::pin);
-    SoilMoisture::moisture = ((SoilMoisture::moisture-4095)/4095)*100;
+    // SoilMoisture::moisture = ((SoilMoisture::moisture-4950)/4950)*100;
     return SoilMoisture::moisture;
 }
