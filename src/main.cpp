@@ -5,8 +5,8 @@
 #include <Controller.hpp>
 
 // Define your WiFi credentials
-const char* ssid = "ISA_ppr_leaked_goto_lib";
-const char* password = "gglmonsta555";
+const char* ssid = "Simha";
+const char* password = "Jogi2Jogi";
 
 
 WebServer server;
@@ -14,9 +14,10 @@ WebServer server;
 // Initialize the AsyncWebServer object
 AsyncWebServer router(80);
 
-Timer pumpTimer;
+Timer collectData;
+bool collect = true;
 
-Controller master(2, 4, 1000, 1000, 1000, 1000);
+Controller master(2, 4, 1000, 1000, 3000, 5000);
 
 void setup() {
 
@@ -25,6 +26,9 @@ void setup() {
   server.initWebServer(ssid, password, "http://localhost:4000");
 
   pinMode(2, OUTPUT);
+
+  //collect dataOn is set to 10ms in the hopes it will only collect once
+  collectData.initTimer(10, 5000);
 
   router.on("/updatestate", HTTP_POST, [](AsyncWebServerRequest * request){
   }, NULL, [](AsyncWebServerRequest * request, uint8_t *data, size_t len, size_t index, size_t total) {
@@ -41,12 +45,13 @@ void setup() {
     const char* type = doc["type"];
     const char* action = doc["action"];
     Serial.println(type);
+    Serial.println(action);
 
     //update controller state
-    if((strcmp(action, "on") == 0) && (strcmp(type, "pump") == 0)){
+    if((strcmp(action, "on") == 0) && (strcmp(type, "water") == 0)){
       master.updatePumpState(HIGH);
     }
-    else if((strcmp(action, "off") == 0) && (strcmp(type, "pump") == 0)){
+    else if((strcmp(action, "off") == 0) && (strcmp(type, "water") == 0)){
       master.updatePumpState(LOW);
     }
     else if((strcmp(action, "on") == 0) && (strcmp(type, "light") == 0)){
@@ -56,16 +61,23 @@ void setup() {
       master.updateLightState(LOW);
     }
     else if((strcmp(action, "on") == 0) && (strcmp(type, "autopilot") == 0)){
-      master.updateAutopilotState(LOW);
-    }
-    else if((strcmp(action, "off") == 0) && (strcmp(type, "autopilot") == 0)){
       master.updateAutopilotState(HIGH);
     }
-    else if((strcmp(action, "on") == 0) && (strcmp(type, "interval") == 0)){
-      master.updateInterval(LOW);
+    else if((strcmp(action, "off") == 0) && (strcmp(type, "autopilot") == 0)){
+      master.updateAutopilotState(LOW);
     }
-    else if((strcmp(action, "off") == 0) && (strcmp(type, "interval") == 0)){
-      master.updateInterval(LOW);
+    else if((strcmp(action, "on") == 0) && (strcmp(type, "lightInterval") == 0)){
+      Serial.println("lightInterval on");
+      master.updateLightInterval(HIGH);
+    }
+    else if((strcmp(action, "off") == 0) && (strcmp(type, "lightInterval") == 0)){
+      master.updateLightInterval(LOW);
+    }
+    else if((strcmp(action, "on") == 0) && (strcmp(type, "pumpInterval") == 0)){
+      master.updatePumpInterval(HIGH);
+    }
+    else if((strcmp(action, "off") == 0) && (strcmp(type, "pumpInterval") == 0)){
+      master.updatePumpInterval(LOW);
     }
 
     request->send(200);
@@ -76,10 +88,14 @@ void setup() {
 }
 
 void loop() {
-  pumpTimer.updateTimer();
-  if(pumpTimer.isOn()){
-    digitalWrite(2, HIGH);
-  }else{
-    digitalWrite(2, LOW);
-  }
+  // collectData.updateTimer();
+  // if(collectData.isOn()){
+  //   //collect data
+  //   //send it to server
+  // }
+  // else{
+  //   //wait, don't do anything
+  // }
+
+  master.autopilotMode();
 }

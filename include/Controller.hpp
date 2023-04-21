@@ -1,5 +1,4 @@
 #include <Arduino.h>
-#include <Timer.hpp>
 
 class Controller{
     public:
@@ -7,7 +6,8 @@ class Controller{
         void updatePumpState(int state);
         void updateLightState(int state);
         void updateAutopilotState(int state);
-        void updateInterval(int interval);
+        void updateLightInterval(int interval);
+        void updatePumpInterval(int interval);
         void autopilotMode();
     private:
         int pumpPin;
@@ -15,5 +15,6 @@ class Controller{
         int lightPin;
         int lightState;
         int autopilotState;
-        int interval;
+        int lightInterval;
+        int pumpInterval;
 };
