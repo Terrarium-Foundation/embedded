@@ -3,6 +3,8 @@
 #include <WebServer.hpp>
 #include <Timer.hpp>
 #include <Controller.hpp>
+#include <DHT.h>
+#include <SoilMoisture.hpp>
 
 // Define your WiFi credentials
 const char* ssid = "Simha";
@@ -10,25 +12,31 @@ const char* password = "Jogi2Jogi";
 
 
 WebServer server;
+std::vector<String> keys = {"humidity", "temperature", "soilmoisture"};
+std::vector<String> values;
 
 // Initialize the AsyncWebServer object
 AsyncWebServer router(80);
 
+Controller master(2, 4, 1000, 1000, 3000, 5000);
+
 Timer collectData;
 bool collect = true;
 
-Controller master(2, 4, 1000, 1000, 3000, 5000);
+DHT dht(5, DHT11);
+SoilMoisture soil(33);
 
 void setup() {
 
   Serial.begin(9600);
 
-  server.initWebServer(ssid, password, "http://localhost:4000");
+  server.initWebServer(ssid, password, "http://192.168.1.26:4000");
 
   pinMode(2, OUTPUT);
 
   //collect dataOn is set to 10ms in the hopes it will only collect once
   collectData.initTimer(10, 5000);
+  collectData.startTimer();
 
   router.on("/updatestate", HTTP_POST, [](AsyncWebServerRequest * request){
   }, NULL, [](AsyncWebServerRequest * request, uint8_t *data, size_t len, size_t index, size_t total) {
@@ -83,19 +91,29 @@ void setup() {
     request->send(200);
   });
 
+  dht.begin();
   // Start the server
   router.begin();
 }
 
 void loop() {
-  // collectData.updateTimer();
-  // if(collectData.isOn()){
-  //   //collect data
-  //   //send it to server
-  // }
-  // else{
-  //   //wait, don't do anything
-  // }
+  collectData.updateTimer();
+  if(collectData.isOn()){
+    //collect data
+    String h = String(dht.readHumidity());
+    String t = String(dht.readTemperature());
+    String s = String(soil.readData());
+    Serial.print("Huidity: "+h);
+    Serial.print(" Temperature: "+t);
+    Serial.println(" Soil Moisture: "+s);
+    values = {h, t, s};
+    String json = server.makeJson(keys, values);
+    server.postRequest("/sensor/savesensordata", json);
+    //send it to server
+  }
+  else{
+    //wait, don't do anything
+  }
 
   master.autopilotMode();
 }

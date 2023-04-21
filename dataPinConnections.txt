@@ -1,0 +1,4 @@
+light: GPIO2
+pump: GPIO4
+dht11: GPIO5
+soilmoisture: GPIO33
